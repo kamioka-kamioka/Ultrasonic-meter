@@ -1,9 +1,13 @@
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 
+#define SWITCH_PIN 2
 #define ECHO_PIN 11
 #define TRIG_PIN 12
 #define TEMP_PIN A3
+#define ON 1
+#define OFF 0
+#define SIZE 7.5
 
 double getDistance(double);
 double microsecondsToCentimeter(long, double);
@@ -15,11 +19,13 @@ double temperature = 0;
 double temperatureTotal = 0;
 int tempCount = 0;
 int distCount = 0;
+int toggle = OFF;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 void setup()
 {
+  pinMode(SWITCH_PIN, INPUT);
   pinMode(ECHO_PIN, INPUT);
   pinMode(TRIG_PIN, OUTPUT);
   lcd.init();
@@ -55,10 +61,30 @@ void loop()
   lcd.setCursor(0, 1);
   lcd.print("DIST:         cm");
   lcd.setCursor(6, 1);
-  lcd.print(distance);
-  Serial.print(distance, 4);
-  Serial.println("cm");
+  if (toggle == ON)
+  {
+    lcd.print(distance + SIZE);
+    Serial.print(distance + SIZE, 4);
+    Serial.println("cm");
+  }
+  else
+  {
+    lcd.print(distance);
+    Serial.print(distance, 4);
+    Serial.println("cm");
+  }
+
   lcd.home();
+
+  if (digitalRead(SWITCH_PIN) == HIGH && toggle == OFF)
+  {
+    toggle = ON;
+  }
+  else if (digitalRead(SWITCH_PIN) == HIGH && toggle == ON)
+  {
+    toggle = OFF;
+  }
+
   delay(200);
 }
 
